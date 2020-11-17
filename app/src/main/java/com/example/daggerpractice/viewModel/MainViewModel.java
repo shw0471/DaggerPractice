@@ -22,6 +22,7 @@ public class MainViewModel extends AndroidViewModel {
     @NonNull
     private final GithubService githubService;
     private final MutableLiveData<List<GithubRepo>> liveGithubRepoList = new MutableLiveData<>();
+    private final MutableLiveData<Boolean> isLoading = new MutableLiveData<>(false);
 
     @Inject
     public MainViewModel(@NonNull Application application,
@@ -31,10 +32,14 @@ public class MainViewModel extends AndroidViewModel {
     }
 
     public void loadRepos(String userID) {
+        isLoading.setValue(true);
         githubService.getGithubRepo(userID)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(liveGithubRepoList::setValue, throwable -> {
+                .subscribe(githubRepos -> {
+                    isLoading.setValue(false);
+                    liveGithubRepoList.setValue(githubRepos);
+                }, throwable -> {
                     GithubRepo githubRepo = new GithubRepo();
                     List<GithubRepo> githubRepoList = new ArrayList<>();
 
@@ -42,6 +47,7 @@ public class MainViewModel extends AndroidViewModel {
                     githubRepo.setCreated_at("please check the Github ID");
                     githubRepoList.add(githubRepo);
 
+                    isLoading.setValue(false);
                     liveGithubRepoList.setValue(githubRepoList);
                 });
     }
@@ -51,4 +57,8 @@ public class MainViewModel extends AndroidViewModel {
         return liveGithubRepoList;
     }
 
+    @NonNull
+    public MutableLiveData<Boolean> getIsLoading() {
+        return isLoading;
+    }
 }

@@ -38,6 +38,7 @@ public class MainActivity extends DaggerAppCompatActivity {
 
         mainViewModel = new ViewModelProvider(this, viewModelFactory).
                 get(MainViewModel.class);
+        binding.get().setViewModel(mainViewModel);
 
         binding.get().btnSearch.setOnClickListener(new View.OnClickListener() {
             @Override
